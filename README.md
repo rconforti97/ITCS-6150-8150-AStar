@@ -10,9 +10,7 @@ Using the manhatten distance I calculated the amount of moves it would take to g
 # How to run:
 - Have the a_star.py and boards.txt file in the same directory 
 - When you hit run it will print the following:
--        What boards we read in from the boards.txt file
--        Of the boards from file which ones are solveable boards
--        The boards we will be solving. 
+         What boards we read in from the boards.txt file. Of the boards from file which ones are solveable boards. And lastly, the boards we will be solving. Example is below.
 
 ![image](https://user-images.githubusercontent.com/50918318/153513529-b6b27831-cd9d-42fd-bb6b-6c31129b5170.png)
 
