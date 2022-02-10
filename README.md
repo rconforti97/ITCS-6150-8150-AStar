@@ -5,6 +5,6 @@ For ITCS 6150/8150 - Intelligent Systems course in 2022 Spring. We are tasked wi
 I used the A Star algorithm
 
 # How to run:
-Open up your favorite IDE and hit run! Ensure you have the imports up top but they are very basic imports
+Open up your favorite IDE and hit run! Ensure you have the boards file in the same directory as the py file. 
 
 
