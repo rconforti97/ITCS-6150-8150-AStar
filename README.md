@@ -13,10 +13,12 @@ Using the manhatten distance I calculated the amount of moves it would take to g
 -        What boards we read in from the boards.txt file
 -        Of the boards from file which ones are solveable boards
 -        The boards we will be solving. 
--        ![image](https://user-images.githubusercontent.com/50918318/153513529-b6b27831-cd9d-42fd-bb6b-6c31129b5170.png)
+
+![image](https://user-images.githubusercontent.com/50918318/153513529-b6b27831-cd9d-42fd-bb6b-6c31129b5170.png)
 
 - Hit enter to run one board at a time (it will prompt after each board)
 - When it's done running it will print the path, path cost, and the number of nodes expanded
+
 ![image](https://user-images.githubusercontent.com/50918318/153513553-f93d27fc-615e-4b56-b2ec-03c376b27b00.png)
 
 
