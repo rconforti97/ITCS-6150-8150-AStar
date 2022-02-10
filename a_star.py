@@ -4,21 +4,17 @@ import queue
 
 class Node:
     def __init__(self, value, parent, h, g):
-        self.parent = parent # the parent board
         self.value = value # our current board
-        self.g = g  # the depth cost 
+        self.parent = parent # the parent board
         self.h = h  # heuristic cost
-        self.f = g + h  # path and heuristic
+        self.g = g  # the depth cost 
+        self.f = h+g  # path and heuristic
 
     def __lt__(self, other):
-        if self.g < other.g:
+        if self.f < other.f:
             return True
         else:
             return False
-        # if self.f < other.f:
-        #     return True
-        # else:
-        #     return False
 
 #######################################################################################
 # This takes the boards from the board file and reads them in. 
@@ -66,6 +62,22 @@ def printSolveableBoards(boards):
     print('\nBoards we will be solving %s' % temp_boards)
     return temp_boards
 
+def setPath(current, path, openList):
+    while current.parent != '': # so this is why 4 isnt printing since its the goal board it has no parent
+        path.insert(0, current.parent.value)
+        current = current.parent
+    if len(openList) == 1:
+        path.insert(0, current.value)
+        
+def printPath(path):
+    print("Start")
+    for c in path: 
+        for x in c:
+            for n in x: 
+                print(n, end=" ")
+            print("")
+        print("")
+
 #######################################################################################
 # I am just doing number of misplaced tiles as a heuritstic 
 def heuristic(startNode, goalNode):
@@ -78,14 +90,7 @@ def heuristic(startNode, goalNode):
             
             # if startNode[i][j] != goalNode[i][j] and startNode[i][j] != 0:
             #     temp_value += 1
-            
-    # print('heuristic value:', temp_value)
     return temp_value
-
- #         if startNode[i][j] != goalNode[i][j] and startNode[i][j] != 0:
- #             print('startNode[i][j]', startNode[i][j])
- #             print('goalNode[i][j]', goalNode[i][j])
- #             temp_value += 1
 
 # -------------------
 # | 0,0 | 0,1 | 0,2 |
@@ -96,18 +101,19 @@ def heuristic(startNode, goalNode):
 def getNeighbors(board):
     x, y = np.where(board == 0) # getting the index of zero
     
+    # print('\nboards in board', board)
     x = int(x)
     y = int(y)
     
+    # print(x,y)
     neighbors = []
     
     # up to be in bounds have to be larger then -1 (x value)
     up_temp = x
     up_temp -= 1 
     if up_temp > -1:
-        # print('board line 95', board)
-        temp_board_up = board.copy() # to copy the board
-        # print('temp board up line 97', temp_board_up)
+        # print('up')
+        temp_board_up = board.copy()
         temp_spot_up = temp_board_up[x-1][y]
         temp_board_up[x-1][y] = temp_board_up[x][y]
         temp_board_up[x][y] = temp_spot_up
@@ -117,6 +123,7 @@ def getNeighbors(board):
     right_temp = y
     right_temp += 1
     if right_temp < 3 and right_temp > 0 and y != 2:
+        # print('right')
         temp_board_right = board.copy()
         temp_spot_right = temp_board_right[x][y+1]
         temp_board_right[x][y+1] = temp_board_right[x][y]
@@ -127,6 +134,7 @@ def getNeighbors(board):
     down_temp = x
     down_temp += 1 
     if down_temp < 3 and x != 2:
+        # print('down')
         temp_board_down = board.copy()
         temp_spot_down = temp_board_down[x+1][y]
         temp_board_down[x+1][y] = temp_board_down[x][y]
@@ -136,8 +144,6 @@ def getNeighbors(board):
     # left to be in bounds have to be more then -1 (y value)
     left_temp = y
     left_temp -= 1
-    # print('let_temp', left_temp)
-    # if left_temp < 3 and left_temp > 0 and y != 0:
     if left_temp < 3 and left_temp > -1:
         temp_board_left = board.copy()
         temp_spot_left = temp_board_left[x][y-1]
@@ -146,76 +152,51 @@ def getNeighbors(board):
         neighbors.append(temp_board_left)
         
     neighbors = np.array(neighbors)
-    # print('neighbors', neighbors)
+    # print('neighbors\n', neighbors)
     return neighbors
 
-def setPath(current, path, openList):
-    while current.parent != '': # so this is why 4 isnt printing since its the goal board it has no parent
-        path.insert(0, current.parent.value)
-        current = current.parent
-    if len(openList) == 1:
-        path.insert(0, current.value)
-        
-def printPath(path):
-    print("path")
-    for c in path: 
-        for x in c:
-            for n in x: 
-                print(n, end=" ")
-            print("")
-        print("")
 
-# This is still wrong - comparative is incorrect. 
+
 def inList(board, passed_list):
+    print('**************************')
+    # print('board\n', board.value)
     for i in passed_list:
-        # print(board)
-        # print(i)
-        # if (board.value == i.value).any():
-        if board == i:
+        # print('i\n', i.value, '\n')
+        if np.array_equal(i.value, board.value) == True:
+            print('found a matching board')
             return True
-        else:
-            return False
+    print('no matching board ')
+    return False
 
 def expandNode(node, openList, openListCopy, closedList, goal):
     children = getNeighbors(node.value)
     for c in children:
         child_g = 1 + node.g
         nd = Node(c, node, heuristic(c, goal), child_g) # value, parent, h, g
-        # print('nd h', nd.h)
+        
         if nd.h == 0:  # This is due to board 3 
             openList.put(nd)
             openListCopy.append(nd)
             break
-        # print('inList Result:', inList(nd, openListCopy))
-        if inList(nd, openListCopy):
-            # print('I am in here')
-            new_g = nd.g
-            old_g = node.g
-            if new_g < old_g:
-                # print('I am in new_g < old_g')
-                openList.put(nd)
-                openList.pop(node)
-                openListCopy.append(nd)
-                openListCopy.remove(node)
-                if inList(nd, closedList):
-                    print("i am in inList(nd, closedList)")
-                    closedList.remove(node)
-                    
-        elif not inList(nd, closedList):
-            # print("i am in not inList(nd, closedList)")
+        
+        # print('closed/open list check')
+        if not inList(nd, closedList) and not inList(nd, openListCopy):
+            print('entered if in EN')
             openList.put(nd)
             openListCopy.append(nd)
-            
         
-        
-        # if not inList(nd, closedList) and not inList(nd, openListCopy):
-        #     openList.put(nd)
-        #     openListCopy.append(nd)
+        elif inList(nd, openListCopy):
+            print('entered elif in EN')
+            print('nd.g | node.g', nd.g, node.g)
+            if nd.g < node.g:
+                print('i got past the child g node check')
+                openList.put(nd)
+                openList.remove(node)
+                openListCopy.append(nd)
+                openListCopy.remove(node)
 
 def aStar(start, goal):
-    print('\nStart', start)
     current = Node(start, '', heuristic(start, goal), 0)
-    goal = goal
     path = []
     openList = queue.PriorityQueue() 
     openListCopy = [] 
@@ -224,59 +205,41 @@ def aStar(start, goal):
     closedList = []
     numExpanded = 0
 
+    print(start)
     # test = 0 
-    # while test <6:
-    while True:
+    # while test < 1000:
+    while current.h != 0:
         # test += 1
         current = openList.get()
+        openListCopy.append(current)
         closedList.append(current)
         
+        print('current\n', current.value, 'current.h', current.h)
+        # input("")
+        expandNode(current, openList, openListCopy, closedList, goal)
+        numExpanded += 1
+        openListCopy.sort(key = lambda node: node.f, reverse=False)
         
-        # So we can get a bring out of the board as it goes
-        # print("path")
-        # for c in current.value: 
-        #     for n in c: 
-        #         print(n, end=" ")
-        #     print("")
-
-        if(current.h == 0):
-            print('goal formation found')
-            break
-
-        else:
-            # print('\n\ncurrent.value\n', current.value)
-            expandNode(current, openList, openListCopy, closedList, goal)
-            numExpanded += 1
-            # print('numExpanded', numExpanded)
-            
-    print('current', current.value)
-    if not openList.empty() or current.h == 0:
-        setPath(current, path, openListCopy)
+        print('Number of states expanded:', numExpanded)
         
-    if current.h != 0:
-        print("Path NOT found - Failed!")
+    path.append(current.value) # showin it actualy finds goal
+    setPath(current, path, openListCopy)
+    printPath(path)
+    print('Path cost:', current.g)
+    print('Number of states expanded:', numExpanded)
     
-    return [path, numExpanded]
 
 # ---------------------------------------------------------------------------------------------
 def main():
+    # Getting boards ready for A* algo
     boards = getBoards('boards.txt')
     boards = printSolveableBoards(boards) 
     boards = boardsToMatrix(boards)
+    
     goal = [[1, 2, 3],[4, 5, 6],[7, 8, 0]]
-    # goal = np.reshape(goal, (3,3), order='C')
     
-    
-    # print('boards[0] type line 228', type(boards[5]))
-    # print(boards[5])
-    # boards[0].tolist()
-    
-    # getNeighbors(boards[2])
-
-    [path, numExpanded] = aStar(boards[5], goal)
-    print('Number of states expanded: %d' % numExpanded)
-    printPath(path)
-
+    aStar(boards[5], goal)
+# 
 if __name__ == '__main__':
     main()
     print('\nExiting normally. Thank you')
@@ -285,4 +248,33 @@ if __name__ == '__main__':
 # Why wont board 5, 6, 7 work?
 #      they are looping for some reason 
 #      idk why its doing this. 
+# So, I think its passing boards 0-4 because its not relying on the on the 
+# search function to figure it out. However, boards 5, 6, 7 are and its always 
+# returning false no matter what. I am not sure why this is happneing 
 # =============================================================================
+
+# old expand node 
+# print('node.value', node.value)
+# children = getNeighbors(node.value)
+# for c in children:
+#     child_g = 1 + node.g
+#     nd = Node(c, node, heuristic(c, goal), child_g) # value, parent, h, g
+ # print('inList Result:', inList(nd, openListCopy))
+   # if inList(nd, openListCopy):
+   #     # print('I am in here')
+   #     new_g = nd.g
+   #     old_g = node.g
+   #     if new_g < old_g:
+   #         # print('I am in new_g < old_g')
+   #         openList.put(nd)
+   #         openList.pop(node)
+   #         openListCopy.append(nd)
+   #         openListCopy.remove(node)
+   #         if inList(nd, closedList):
+   #             print("i am in inList(nd, closedList)")
+   #             closedList.remove(node)
+             
+   # elif not inList(nd, closedList):
+   #     # print("i am in not inList(nd, closedList)")
+   #     openList.put(nd)
+   #     openListCopy.append(nd)
