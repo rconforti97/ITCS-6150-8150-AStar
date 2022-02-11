@@ -85,7 +85,7 @@ def printPath(path):
 
 def userInputBoard():
     board = []
-    user_input = input("Enter the board like so [1,2,3,4,5,6,7,8,0]\n")
+    user_input = input("Input board: \n")
     board.append([int(x) for x in user_input.split(',')])
     return board
 # =============================================================================
@@ -233,9 +233,8 @@ def main():
 #     Below is the extra credit checks: 
 #     It will take your input since its based on whatever board/goal input
 # =============================================================================
-    print("****************************")
-    print("\nExtra credit portion has started - It will ask for you to type in the board and goal node")
-    print("Example board input: x,x,x,x,x,x,x,x,x")
+    print("*********************************\nExtra credit portion has started\n*********************************")
+    print("Enter the board like so x,x,x,x,x,x,x,x,x")
     start_input = userInputBoard()
     start_input = boardsToMatrix(start_input)
     for i in start_input:
