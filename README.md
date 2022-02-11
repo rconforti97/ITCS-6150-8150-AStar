@@ -19,5 +19,5 @@ Using the manhatten distance I calculated the amount of moves it would take to g
 
 ![image](https://user-images.githubusercontent.com/50918318/153513553-f93d27fc-615e-4b56-b2ec-03c376b27b00.png)
 
-
-
+# Extra Credit
+This works by having the user input their own start and goal nodes. Per the assignment instructions we are under the assumption that the board is solveable. 
