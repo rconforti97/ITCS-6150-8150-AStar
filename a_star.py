@@ -1,5 +1,5 @@
 import numpy as np
-from copy import copy, deepcopy
+from copy import deepcopy
 import queue
 
 class Node:
@@ -16,7 +16,9 @@ class Node:
         else:
             return False
 
-#######################################################################################
+# =============================================================================
+# These are all board methods below
+# =============================================================================
 # This takes the boards from the board file and reads them in. 
 def getBoards(filename):
     board = []
@@ -49,6 +51,7 @@ def isSolvable(boards) :
     invCount = getInvCount(boards)
     return (invCount % 2 == 0)
 
+# Input - list of boards - figures out if they are solveable
 def printSolveableBoards(boards):
     temp_boards = []
     for i in boards:
@@ -58,17 +61,18 @@ def printSolveableBoards(boards):
             temp_boards += deepcopy([i])
         else:
             print("Board", i, "NOT Solvable")
-
     print('\nBoards we will be solving %s' % temp_boards)
     return temp_boards
 
+# sets the path of the solved boards
 def setPath(current, path, openList):
     while current.parent != '':
         path.insert(0, current.parent.value)
         current = current.parent
     if len(openList) == 1:
         path.insert(0, current.value)
-        
+
+# prints the path of the solved boards
 def printPath(path):
     print("Start")
     for c in path: 
@@ -78,8 +82,17 @@ def printPath(path):
             print("")
         print('  \u2193')
 
-#######################################################################################
-# I am just doing number of misplaced tiles as a heuritstic 
+
+def userInputBoard():
+    board = []
+    user_input = input("Enter the board like so [1,2,3,4,5,6,7,8,0]\n")
+    board.append([int(x) for x in user_input.split(',')])
+    return board
+# =============================================================================
+# End of board methods
+# =============================================================================
+
+# This is the manhatten distance 
 def heuristic(startNode, goalNode):
     temp_value = 0
     for i in range(0, 3):
@@ -90,6 +103,8 @@ def heuristic(startNode, goalNode):
     return temp_value
 
 
+# The way this one works is it takes the x or y value and tests if it valid 
+# before allowing the move to be appended to neighbors.  
 def getNeighbors(board):
     x, y = np.where(board == 0)
     x = int(x)
@@ -140,19 +155,19 @@ def getNeighbors(board):
     neighbors = np.array(neighbors)
     return neighbors
 
-
-
+# Checks if the board is valid
 def inList(board, passed_list):
     for i in passed_list:
         if np.array_equal(i.value, board.value) == True:
             return True
     return False
 
+# Expanding the nodes
 def expandNode(node, openList, openListCopy, closedList, goal):
     children = getNeighbors(node.value)
     for c in children:
         child_g = 1 + node.g
-        nd = Node(c, node, heuristic(c, goal), child_g) # value, parent, h, g
+        nd = Node(c, node, heuristic(c, goal), child_g)
         
         if nd.h == 0:  # This is due to board 3 
             openList.put(nd)
@@ -170,6 +185,7 @@ def expandNode(node, openList, openListCopy, closedList, goal):
                 openListCopy.append(nd)
                 openListCopy.remove(node)
 
+# My a star algorithm method
 def aStar(start, goal):
     current = Node(start, '', heuristic(start, goal), 0)
     path = []
@@ -180,7 +196,6 @@ def aStar(start, goal):
     closedList = []
     numExpanded = 0
 
-    # print(start)
     while current.h != 0:
         current = openList.get()
         openListCopy.append(current)
@@ -205,15 +220,32 @@ def main():
     boards = getBoards('boards.txt')
     boards = printSolveableBoards(boards) 
     boards = boardsToMatrix(boards)
-    
     goal = [[1, 2, 3],[4, 5, 6],[7, 8, 0]]
     
+    # Auto iterates through the boards - you will have to hit ENTER after each
+    # board. 
     for i in boards:
         print("\n****************************\nHit enter to solve board:\n", i)
         input("")
         aStar(i, goal)
-    # aStar(boards[6], goal)
-# 
+      
+# =============================================================================
+#     Below is the extra credit checks: 
+#     It will take your input since its based on whatever board/goal input
+# =============================================================================
+    print("****************************")
+    print("\nExtra credit portion has started - It will ask for you to type in the board and goal node")
+    print("Example board input: x,x,x,x,x,x,x,x,x")
+    start_input = userInputBoard()
+    start_input = boardsToMatrix(start_input)
+    for i in start_input:
+        start_input = i
+    goal_input = userInputBoard()
+    goal_input = boardsToMatrix(goal_input)
+    for i in goal_input:
+        goal_input = i
+    aStar(start_input, goal_input)
+    
 if __name__ == '__main__':
     main()
     print('\nExiting normally. Thank you')
