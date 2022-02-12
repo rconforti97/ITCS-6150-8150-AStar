@@ -1,3 +1,10 @@
+# =============================================================================
+# Rachel Conforti
+# ITCS 6150 - Intelligent Systems
+# Spring 2022
+# A* and the 8 puzzle problem
+# =============================================================================
+
 import numpy as np
 from copy import deepcopy
 import queue
@@ -11,10 +18,7 @@ class Node:
         self.f = h+g  # path and heuristic
 
     def __lt__(self, other):
-        if self.f < other.f:
-            return True
-        else:
-            return False
+        return self.f < other.f
 
 # =============================================================================
 # These are all board methods below
@@ -44,25 +48,32 @@ def getInvCount(board) :
         for j in range(i + 1, len(board)):
             if board[i] > board[j] and board[j] != 0:
                 inv_count += 1
-    return inv_count
+    return (inv_count % 2 == 0)
      
-# Returns True is solveable False if not
-def isSolvable(boards) : 
-    invCount = getInvCount(boards)
-    return (invCount % 2 == 0)
 
 # Input - list of boards - figures out if they are solveable
 def printSolveableBoards(boards):
     temp_boards = []
     for i in boards:
         placeholder = i
-        if(isSolvable(placeholder)) :
+        if(getInvCount(placeholder)) :
             print("Board", placeholder, "Solvable")
             temp_boards += deepcopy([i])
         else:
             print("Board", i, "NOT Solvable")
     print('\nBoards we will be solving %s' % temp_boards)
     return temp_boards
+
+# This was made for the extra credit portion - reads in user inputted board
+def userInputBoard():
+    board = []
+    user_input = input("Input board: \n")
+    board.append([int(x) for x in user_input.split(',')])
+    return board
+# =============================================================================
+# End of board methods
+# =============================================================================
+
 
 # sets the path of the solved boards
 def setPath(current, path, openList):
@@ -81,18 +92,8 @@ def printPath(path):
                 print(n, end=" ")
             print("")
         print('  \u2193')
-
-
-def userInputBoard():
-    board = []
-    user_input = input("Input board: \n")
-    board.append([int(x) for x in user_input.split(',')])
-    return board
-# =============================================================================
-# End of board methods
-# =============================================================================
-
-# This is the manhatten distance 
+        
+# This is the manhatten distance hueristic
 def heuristic(startNode, goalNode):
     temp_value = 0
     for i in range(0, 3):
@@ -174,7 +175,7 @@ def expandNode(node, openList, openListCopy, closedList, goal):
             openListCopy.append(nd)
             break
         
-        if not inList(nd, closedList) == True and not inList(nd, openListCopy) == True:
+        if not inList(nd, closedList):
             openList.put(nd)
             openListCopy.append(nd)
         
@@ -191,20 +192,20 @@ def aStar(start, goal):
     path = []
     openList = queue.PriorityQueue() 
     openListCopy = [] 
-    openList.put(current) 
-    openListCopy.append(current) 
     closedList = []
     numExpanded = 0
+    
+    openList.put(current) 
+    openListCopy.append(current) 
 
     while current.h != 0:
         current = openList.get()
-        openListCopy.append(current)
         closedList.append(current)
         
         expandNode(current, openList, openListCopy, closedList, goal)
         numExpanded += 1
         
-        if numExpanded and numExpanded % 100 == 0:
+        if numExpanded % 300 == 0:
             print('Expanding nodes - one moment please')
         
     path.append(current.value) # showin it actualy finds goal
@@ -222,17 +223,15 @@ def main():
     boards = boardsToMatrix(boards)
     goal = [[1, 2, 3],[4, 5, 6],[7, 8, 0]]
     
-    # Auto iterates through the boards - you will have to hit ENTER after each
-    # board. 
+    
+    # Iterates through the boards - have to hit ENTER after each board. 
     for i in boards:
-        print("\n****************************\nHit enter to solve board:\n", i)
+        print("\n****************************\nHit ENTER to solve board:\n", i)
         input("")
         aStar(i, goal)
       
-# =============================================================================
-#     Below is the extra credit checks: 
-#     It will take your input since its based on whatever board/goal input
-# =============================================================================
+
+#     Below is the extra credit checks - uses user input.
     print("*********************************\nExtra credit portion has started\n*********************************")
     print("Enter the board like so x,x,x,x,x,x,x,x,x")
     start_input = userInputBoard()
