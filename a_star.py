@@ -38,6 +38,7 @@ def boardsToMatrix(boards):
     matrix_board = []
     for i in boards:
         temp_boards = np.array(i)
+        # Reshape the array into a 3 by 3 matrix
         matrix_board.append(np.reshape(temp_boards, (3,3), order='C'))
     return matrix_board
 
@@ -51,7 +52,9 @@ def getInvCount(board) :
     return (inv_count % 2 == 0)
      
 
-# Input - list of boards - figures out if they are solveable
+# figures out if they are solveable by taking each board in the list and 
+# calling the method above the returns true or false. True is solveable
+# false is unsolveable. 
 def printSolveableBoards(boards):
     temp_boards = []
     for i in boards:
@@ -61,7 +64,6 @@ def printSolveableBoards(boards):
             temp_boards += deepcopy([i])
         else:
             print("Board", i, "NOT Solvable")
-    print('\nBoards we will be solving %s' % temp_boards)
     return temp_boards
 
 # This was made for the extra credit portion - reads in user inputted board
@@ -83,7 +85,8 @@ def setPath(current, path, openList):
     if len(openList) == 1:
         path.insert(0, current.value)
 
-# prints the path of the solved boards
+# For each board, it prints every line in the board out nicely without the 
+# double brackets and places a down arrow (code u2193) in between
 def printPath(path):
     print("Start")
     for c in path: 
@@ -91,15 +94,20 @@ def printPath(path):
             for n in x:
                 print(n, end=" ")
             print("")
-        print('  \u2193')
+        # prints a nice clean down arrow 
+        print('  \u2193') 
         
 # This is the manhatten distance hueristic
 def heuristic(startNode, goalNode):
     temp_value = 0
     for i in range(0, 3):
         for j in range(0, 3):
+            # Gettings the index where the startNode is equal to value of [i][j]
             start_x, start_y = np.where(startNode == startNode[i][j])
+            # getting the index of where the goalNode is equal the value of startNode[i][j]
             goal_x, goal_y = np.where(goalNode == startNode[i][j])
+            # Subtracting the start and goal x/y to figure out how out of place
+            # this is from the goal node.
             temp_value += (abs(start_x - goal_x) + abs(start_y - goal_y))
     return temp_value
 
@@ -113,7 +121,8 @@ def getNeighbors(board):
     
     neighbors = []
     
-    # up to be in bounds have to be larger then -1 (x value)
+    # Checking if we subtract one from the current x position is it still valid?
+    # If so, we consider that a valid move and make the swaps and append. 
     up_temp = x
     up_temp -= 1 
     if up_temp > -1:
@@ -123,7 +132,8 @@ def getNeighbors(board):
         temp_board_up[x][y] = temp_spot_up
         neighbors.append(temp_board_up)
         
-    # right to be in bounds have to be less then 3 (y value)
+    # Checking if we add one from the current y position is it still valid?
+    # If so, we consider that a valid move and make the swaps and append. 
     right_temp = y
     right_temp += 1
     if right_temp < 3 and right_temp > 0 and y != 2:
@@ -133,7 +143,8 @@ def getNeighbors(board):
         temp_board_right[x][y] = temp_spot_right
         neighbors.append(temp_board_right)
 
-    # down to be in bounds have to be less then 3 (x value)
+    # Checking if we add one from the current x position is it still valid?
+    # If so, we consider that a valid move and make the swaps and append. 
     down_temp = x
     down_temp += 1 
     if down_temp < 3 and x != 2:
@@ -143,7 +154,8 @@ def getNeighbors(board):
         temp_board_down[x][y] = temp_spot_down
         neighbors.append(temp_board_down)
 
-    # left to be in bounds have to be more then -1 (y value)
+    # Checking if we subtract one from the current y position is it still valid?
+    # If so, we consider that a valid move and make the swaps and append. 
     left_temp = y
     left_temp -= 1
     if left_temp < 3 and left_temp > -1:
@@ -170,15 +182,19 @@ def expandNode(node, openList, openListCopy, closedList, goal):
         child_g = 1 + node.g
         nd = Node(c, node, heuristic(c, goal), child_g)
         
-        if nd.h == 0:  # This is due to board 3 
+        # Are we at the goal node?
+        if nd.h == 0:
             openList.put(nd)
             openListCopy.append(nd)
             break
         
+        # If the new move is not in the closedList append - else go down
         if not inList(nd, closedList):
             openList.put(nd)
             openListCopy.append(nd)
         
+        # If the new move is in the openList, check to see if it is better,
+        # if so, remove the worse move and add the better one. 
         elif inList(nd, openListCopy):
             if nd.g < node.g:
                 openList.put(nd)
@@ -205,6 +221,8 @@ def aStar(start, goal):
         expandNode(current, openList, openListCopy, closedList, goal)
         numExpanded += 1
         
+        # I am aware my code takes a little, so this is to let you know its 
+        # still running and not stuck in a loop. 
         if numExpanded % 300 == 0:
             print('Expanding nodes - one moment please')
         
